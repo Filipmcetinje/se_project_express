@@ -5,14 +5,15 @@ const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
 const getItems = async (req, res) => {
   try {
     const items = await ClothingItem.find({});
-    res.json(items);
+    return res.json(items);
   } catch (err) {
     console.error(err);
-    res
+    return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
   }
 };
+
 const createItem = async (req, res) => {
   try {
     const { name, weather, imageUrl } = req.body;
@@ -25,16 +26,17 @@ const createItem = async (req, res) => {
     }
 
     const item = await ClothingItem.create({ name, weather, imageUrl, owner });
-    res.status(201).json(item);
+    return res.status(201).json(item);
   } catch (err) {
     if (err.name === "ValidationError" || err.name === "CastError") {
       return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
     }
-    res
+    return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
   }
 };
+
 const deleteItem = async (req, res) => {
   try {
     const { itemId } = req.params;
@@ -49,7 +51,7 @@ const deleteItem = async (req, res) => {
       throw error;
     });
 
-    res.json({ message: "Item deleted", data: deleted });
+    return res.json({ message: "Item deleted", data: deleted });
   } catch (err) {
     console.error(err);
 
@@ -57,48 +59,56 @@ const deleteItem = async (req, res) => {
       return res.status(err.statusCode).json({ message: err.message });
     }
 
-    res
+    return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
   }
 };
-const likeItem = (req, res) => {
-  ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true }
-  )
-    .orFail(() => {
+
+const likeItem = async (req, res) => {
+  try {
+    const item = await ClothingItem.findByIdAndUpdate(
+      req.params.itemId,
+      { $addToSet: { likes: req.user._id } },
+      { new: true }
+    ).orFail(() => {
       const error = new Error("Item not found");
-      error.statusCode = 404;
+      error.statusCode = NOT_FOUND;
       throw error;
-    })
-    .then((item) => res.json(item))
-    .catch((err) => {
-      if (err.statusCode) {
-        return res.status(err.statusCode).json({ message: err.message });
-      }
-      res.status(500).json({ message: "An error has occurred on the server" });
     });
+
+    return res.json(item);
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ message: err.message });
+    }
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error has occurred on the server" });
+  }
 };
 
-const dislikeItem = (req, res) => {
-  ClothingItem.findByIdAndUpdate(
-    req.params.itemId,
-    { $pull: { likes: req.user._id } },
-    { new: true }
-  )
-    .orFail(() => {
+const dislikeItem = async (req, res) => {
+  try {
+    const item = await ClothingItem.findByIdAndUpdate(
+      req.params.itemId,
+      { $pull: { likes: req.user._id } },
+      { new: true }
+    ).orFail(() => {
       const error = new Error("Item not found");
-      error.statusCode = 404;
+      error.statusCode = NOT_FOUND;
       throw error;
-    })
-    .then((item) => res.json(item))
-    .catch((err) => {
-      if (err.statusCode) {
-        return res.status(err.statusCode).json({ message: err.message });
-      }
-      res.status(500).json({ message: "An error has occurred on the server" });
     });
+
+    return res.json(item);
+  } catch (err) {
+    if (err.statusCode) {
+      return res.status(err.statusCode).json({ message: err.message });
+    }
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error has occurred on the server" });
+  }
 };
+
 module.exports = { getItems, createItem, deleteItem, likeItem, dislikeItem };

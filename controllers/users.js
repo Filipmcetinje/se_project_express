@@ -4,10 +4,10 @@ const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
 const getUsers = async (req, res) => {
   try {
     const users = await User.find();
-    res.json(users);
+    return res.json(users);
   } catch (err) {
     console.error(err);
-    res
+    return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
   }
@@ -21,7 +21,7 @@ const getUser = async (req, res) => {
       throw error;
     });
 
-    res.json(user);
+    return res.json(user);
   } catch (err) {
     console.error(err);
 
@@ -33,7 +33,7 @@ const getUser = async (req, res) => {
       return res.status(err.statusCode).json({ message: err.message });
     }
 
-    res
+    return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
   }
@@ -43,7 +43,7 @@ const createUser = async (req, res) => {
   const { name, avatar } = req.body;
   try {
     const newUser = await User.create({ name, avatar });
-    res.status(201).json(newUser);
+    return res.status(201).json(newUser);
   } catch (err) {
     console.error(err);
 
@@ -51,7 +51,7 @@ const createUser = async (req, res) => {
       return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
     }
 
-    res
+    return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
   }
