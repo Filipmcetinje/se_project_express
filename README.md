@@ -7,3 +7,10 @@ The back-end project is focused on creating a server for the WTWR application. Y
 
 ### Testing
 Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
+
+
+##  Description
+This is the back-end for the WTWR (What to Wear?) application.  
+It provides a REST API to manage users and clothing items.  
+The server is built with **Node.js**, **Express.js**, and **MongoDB** (via Mongoose).  
+
