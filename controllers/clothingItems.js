@@ -1,5 +1,7 @@
 const mongoose = require("mongoose");
+
 const ClothingItem = require("../models/clothingItem");
+
 const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
 
 const getItems = async (req, res) => {
@@ -20,9 +22,9 @@ const createItem = async (req, res) => {
     const owner = req.user._id;
 
     if (!name || !weather || !imageUrl || !owner) {
-      return res
-        .status(BAD_REQUEST)
-        .json({ message: "name, weather, imageUrl and owner are required" });
+      return res.status(BAD_REQUEST).json({
+        message: "name, weather, imageUrl and owner are required",
+      });
     }
 
     const item = await ClothingItem.create({ name, weather, imageUrl, owner });
@@ -31,6 +33,7 @@ const createItem = async (req, res) => {
     if (err.name === "ValidationError" || err.name === "CastError") {
       return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
     }
+    console.error(err);
     return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
@@ -42,7 +45,7 @@ const deleteItem = async (req, res) => {
     const { itemId } = req.params;
 
     if (!mongoose.isValidObjectId(itemId)) {
-      return res.status(BAD_REQUEST).json({ message: "Invalid item id" });
+      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
     }
 
     const deleted = await ClothingItem.findByIdAndDelete(itemId).orFail(() => {
@@ -53,12 +56,10 @@ const deleteItem = async (req, res) => {
 
     return res.json({ message: "Item deleted", data: deleted });
   } catch (err) {
-    console.error(err);
-
     if (err.statusCode) {
       return res.status(err.statusCode).json({ message: err.message });
     }
-
+    console.error(err);
     return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
@@ -67,8 +68,14 @@ const deleteItem = async (req, res) => {
 
 const likeItem = async (req, res) => {
   try {
+    const { itemId } = req.params;
+
+    if (!mongoose.isValidObjectId(itemId)) {
+      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+    }
+
     const item = await ClothingItem.findByIdAndUpdate(
-      req.params.itemId,
+      itemId,
       { $addToSet: { likes: req.user._id } },
       { new: true }
     ).orFail(() => {
@@ -79,9 +86,13 @@ const likeItem = async (req, res) => {
 
     return res.json(item);
   } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+    }
     if (err.statusCode) {
       return res.status(err.statusCode).json({ message: err.message });
     }
+    console.error(err);
     return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
@@ -90,8 +101,14 @@ const likeItem = async (req, res) => {
 
 const dislikeItem = async (req, res) => {
   try {
+    const { itemId } = req.params;
+
+    if (!mongoose.isValidObjectId(itemId)) {
+      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+    }
+
     const item = await ClothingItem.findByIdAndUpdate(
-      req.params.itemId,
+      itemId,
       { $pull: { likes: req.user._id } },
       { new: true }
     ).orFail(() => {
@@ -102,9 +119,13 @@ const dislikeItem = async (req, res) => {
 
     return res.json(item);
   } catch (err) {
+    if (err.name === "CastError") {
+      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+    }
     if (err.statusCode) {
       return res.status(err.statusCode).json({ message: err.message });
     }
+    console.error(err);
     return res
       .status(SERVER_ERROR)
       .json({ message: "An error has occurred on the server" });
