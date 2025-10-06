@@ -11,9 +11,11 @@ const app = express();
 
 app.use(express.json());
 
-app.use("/", usersRouter);
+app.post("/signup", usersRouter);
+app.post("/signin", usersRouter);
 
 app.use(auth);
+app.use("/users", usersRouter);
 app.use("/items", itemsRouter);
 
 app.use((req, res) => {
