@@ -10,8 +10,6 @@ const itemsRouter = require("./routes/clothingItems");
 
 const { createUser, login } = require("./controllers/users");
 
-const auth = require("./middlewares/auth");
-
 const { NOT_FOUND } = require("./utils/errors");
 
 const { PORT = 3001, MONGO_URI = "mongodb://127.0.0.1:27017/wtwr_db" } =
@@ -20,13 +18,14 @@ const { PORT = 3001, MONGO_URI = "mongodb://127.0.0.1:27017/wtwr_db" } =
 const app = express();
 
 app.use(cors());
+
 app.use(express.json());
 
 app.post("/signup", createUser);
 app.post("/signin", login);
 
-app.use("/users", auth, usersRouter);
-app.use("/items", auth, itemsRouter);
+app.use("/users", usersRouter);
+app.use("/items", itemsRouter);
 
 app.use((req, res) => {
   res.status(NOT_FOUND).json({ message: "Requested resource not found" });
@@ -40,6 +39,6 @@ app.use((err, req, res) => {
 mongoose
   .connect(MONGO_URI)
   .then(() => {
-    app.listen(PORT, () => {});
+    app.listen(PORT);
   })
   .catch(() => {});

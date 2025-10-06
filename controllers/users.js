@@ -17,10 +17,10 @@ const getCurrentUser = async (req, res) => {
   try {
     const user = await User.findById(req.user._id).orFail();
     return res.status(200).json({
-      _id: user._id,
       name: user.name,
       avatar: user.avatar,
       email: user.email,
+      _id: user._id,
     });
   } catch (err) {
     return res.status(NOT_FOUND).json({ message: "User not found" });
@@ -37,13 +37,7 @@ const createUser = async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(CONFLICT).json({ message: "Email already in use" });
-    }
-
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await User.create({
       name,
       avatar,
@@ -56,6 +50,9 @@ const createUser = async (req, res) => {
 
     return res.status(201).json(userSafe);
   } catch (err) {
+    if (err.code === 11000) {
+      return res.status(CONFLICT).json({ message: "Email already in use" });
+    }
     if (err.name === "ValidationError") {
       return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
     }
@@ -76,7 +73,6 @@ const login = async (req, res) => {
     const user = await User.findUserByCredentials(email, password);
 
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
-
     return res.status(200).json({ token });
   } catch (err) {
     return res.status(401).json({ message: "Incorrect email or password" });
@@ -85,11 +81,18 @@ const login = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const { name, avatar } = req.body;
+    const { name, avatar, email } = req.body;
+
+    if (email) {
+      const existingUser = await User.findOne({ email });
+      if (existingUser && existingUser._id.toString() !== req.user._id) {
+        return res.status(CONFLICT).json({ message: "Email already in use" });
+      }
+    }
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { name, avatar },
+      { name, avatar, email },
       { new: true, runValidators: true }
     );
 
@@ -98,7 +101,6 @@ const updateUser = async (req, res) => {
     }
 
     return res.status(200).json({
-      _id: updatedUser._id,
       name: updatedUser.name,
       avatar: updatedUser.avatar,
       email: updatedUser.email,
