@@ -13,9 +13,10 @@ const getItems = async (req, res) => {
   try {
     const items = await ClothingItem.find({});
     return res.json(items);
-  } catch (err) {
-    console.error(err);
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
+  } catch {
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error has occurred on the server" });
   }
 };
 
@@ -24,20 +25,16 @@ const createItem = async (req, res) => {
     const { name, weather, imageUrl } = req.body;
     const owner = req.user._id;
 
-    if (!name || !weather || !imageUrl) {
+    if (!name || !weather || !imageUrl || !owner) {
       return res.status(BAD_REQUEST).json({
-        message: "name, weather, and imageUrl are required",
+        message: "name, weather, imageUrl and owner are required",
       });
     }
 
     const item = await ClothingItem.create({ name, weather, imageUrl, owner });
     return res.status(201).json(item);
-  } catch (err) {
-    if (err.name === "ValidationError" || err.name === "CastError") {
-      return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
-    }
-    console.error(err);
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
+  } catch {
+    return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
   }
 };
 
@@ -58,17 +55,17 @@ const deleteItem = async (req, res) => {
     if (item.owner.toString() !== req.user._id) {
       return res
         .status(FORBIDDEN)
-        .json({ message: "You cannot delete this item" });
+        .json({ message: "Cannot delete another user's item" });
     }
 
     await item.deleteOne();
     return res.json({ message: "Item deleted", data: item });
   } catch (err) {
-    if (err.statusCode) {
+    if (err.statusCode)
       return res.status(err.statusCode).json({ message: err.message });
-    }
-    console.error(err);
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error has occurred on the server" });
   }
 };
 
@@ -92,14 +89,11 @@ const likeItem = async (req, res) => {
 
     return res.json(item);
   } catch (err) {
-    if (err.name === "CastError") {
-      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
-    }
-    if (err.statusCode) {
+    if (err.statusCode)
       return res.status(err.statusCode).json({ message: err.message });
-    }
-    console.error(err);
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error has occurred on the server" });
   }
 };
 
@@ -123,14 +117,11 @@ const dislikeItem = async (req, res) => {
 
     return res.json(item);
   } catch (err) {
-    if (err.name === "CastError") {
-      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
-    }
-    if (err.statusCode) {
+    if (err.statusCode)
       return res.status(err.statusCode).json({ message: err.message });
-    }
-    console.error(err);
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error has occurred on the server" });
   }
 };
 

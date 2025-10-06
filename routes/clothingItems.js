@@ -18,6 +18,7 @@ router.use(auth);
 
 router.post("/", createItem);
 router.delete("/:itemId", deleteItem);
+
 router.put("/:itemId/likes", likeItem);
 router.delete("/:itemId/likes", dislikeItem);
 
