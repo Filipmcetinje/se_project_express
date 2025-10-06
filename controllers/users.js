@@ -1,64 +1,40 @@
 const bcrypt = require("bcryptjs");
+
 const jwt = require("jsonwebtoken");
+
 const User = require("../models/user");
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR, CONFLICT } = require("../utils/errors");
+
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  SERVER_ERROR,
+  CONFLICT,
+} = require("../utils/errors");
+
 const { JWT_SECRET = "dev-secret" } = require("../utils/config");
-
-
-const getUsers = async (req, res) => {
-  try {
-    const users = await User.find({});
-    return res.status(200).json(users);
-  } catch (err) {
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
-  }
-};
-
-
-const getUser = async (req, res) => {
-  try {
-    const user = await User.findById(req.params.id).orFail(() => {
-      const error = new Error("User not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
-    });
-    return res.status(200).json(user);
-  } catch (err) {
-    if (err.name === "CastError") {
-      return res.status(BAD_REQUEST).json({ message: "Invalid user ID" });
-    }
-    if (err.statusCode) {
-      return res.status(err.statusCode).json({ message: err.message });
-    }
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
-  }
-};
-
 
 const getCurrentUser = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id);
-    if (!user) {
-      return res.status(NOT_FOUND).json({ message: "User not found" });
-    }
+    const user = await User.findById(req.user._id).orFail();
     return res.status(200).json({
+      _id: user._id,
       name: user.name,
       avatar: user.avatar,
       email: user.email,
-      _id: user._id,
     });
   } catch (err) {
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
+    return res.status(NOT_FOUND).json({ message: "User not found" });
   }
 };
-
 
 const createUser = async (req, res) => {
   try {
     const { name, avatar, email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(BAD_REQUEST).json({ message: "Email and password are required" });
+      return res
+        .status(BAD_REQUEST)
+        .json({ message: "Email and password are required" });
     }
 
     const existingUser = await User.findOne({ email });
@@ -67,6 +43,7 @@ const createUser = async (req, res) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
+
     const user = await User.create({
       name,
       avatar,
@@ -86,13 +63,14 @@ const createUser = async (req, res) => {
   }
 };
 
-
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(BAD_REQUEST).json({ message: "Email and password are required" });
+      return res
+        .status(BAD_REQUEST)
+        .json({ message: "Email and password are required" });
     }
 
     const user = await User.findUserByCredentials(email, password);
@@ -105,14 +83,13 @@ const login = async (req, res) => {
   }
 };
 
-
 const updateUser = async (req, res) => {
   try {
-    const { name, avatar, email } = req.body;
+    const { name, avatar } = req.body;
 
     const updatedUser = await User.findByIdAndUpdate(
       req.user._id,
-      { name, avatar, email },
+      { name, avatar },
       { new: true, runValidators: true }
     );
 
@@ -121,6 +98,7 @@ const updateUser = async (req, res) => {
     }
 
     return res.status(200).json({
+      _id: updatedUser._id,
       name: updatedUser.name,
       avatar: updatedUser.avatar,
       email: updatedUser.email,
@@ -134,8 +112,6 @@ const updateUser = async (req, res) => {
 };
 
 module.exports = {
-  getUsers,
-  getUser,
   getCurrentUser,
   createUser,
   login,

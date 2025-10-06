@@ -2,7 +2,12 @@ const mongoose = require("mongoose");
 
 const ClothingItem = require("../models/clothingItem");
 
-const { BAD_REQUEST, NOT_FOUND, SERVER_ERROR } = require("../utils/errors");
+const {
+  BAD_REQUEST,
+  NOT_FOUND,
+  SERVER_ERROR,
+  FORBIDDEN,
+} = require("../utils/errors");
 
 const getItems = async (req, res) => {
   try {
@@ -10,9 +15,7 @@ const getItems = async (req, res) => {
     return res.json(items);
   } catch (err) {
     console.error(err);
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return res.status(SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -21,9 +24,9 @@ const createItem = async (req, res) => {
     const { name, weather, imageUrl } = req.body;
     const owner = req.user._id;
 
-    if (!name || !weather || !imageUrl || !owner) {
+    if (!name || !weather || !imageUrl) {
       return res.status(BAD_REQUEST).json({
-        message: "name, weather, imageUrl and owner are required",
+        message: "name, weather, and imageUrl are required",
       });
     }
 
@@ -34,9 +37,7 @@ const createItem = async (req, res) => {
       return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
     }
     console.error(err);
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return res.status(SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -48,21 +49,26 @@ const deleteItem = async (req, res) => {
       return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
     }
 
-    const deleted = await ClothingItem.findByIdAndDelete(itemId).orFail(() => {
+    const item = await ClothingItem.findById(itemId).orFail(() => {
       const error = new Error("Item not found");
       error.statusCode = NOT_FOUND;
       throw error;
     });
 
-    return res.json({ message: "Item deleted", data: deleted });
+    if (item.owner.toString() !== req.user._id) {
+      return res
+        .status(FORBIDDEN)
+        .json({ message: "You cannot delete this item" });
+    }
+
+    await item.deleteOne();
+    return res.json({ message: "Item deleted", data: item });
   } catch (err) {
     if (err.statusCode) {
       return res.status(err.statusCode).json({ message: err.message });
     }
     console.error(err);
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return res.status(SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -93,9 +99,7 @@ const likeItem = async (req, res) => {
       return res.status(err.statusCode).json({ message: err.message });
     }
     console.error(err);
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return res.status(SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
@@ -126,9 +130,7 @@ const dislikeItem = async (req, res) => {
       return res.status(err.statusCode).json({ message: err.message });
     }
     console.error(err);
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return res.status(SERVER_ERROR).json({ message: "Server error" });
   }
 };
 
