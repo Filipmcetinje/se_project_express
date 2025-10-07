@@ -1,5 +1,3 @@
-const { UNAUTHORIZED } = require("../utils/errors");
-
 const bcrypt = require("bcryptjs");
 
 const jwt = require("jsonwebtoken");
@@ -11,6 +9,7 @@ const {
   NOT_FOUND,
   SERVER_ERROR,
   CONFLICT,
+  UNAUTHORIZED,
 } = require("../utils/errors");
 
 const { JWT_SECRET = "dev-secret" } = require("../utils/config");

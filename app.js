@@ -34,7 +34,8 @@ app.use((req, res) => {
   res.status(NOT_FOUND).json({ message: "Requested resource not found" });
 });
 
-app.use((err, req, res, next) => {
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, _next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).json({ message });
 });
