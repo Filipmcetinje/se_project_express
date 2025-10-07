@@ -4,6 +4,8 @@ const router = express.Router();
 
 const auth = require("../middlewares/auth");
 
+const { NOT_FOUND } = require("../utils/errors");
+
 const {
   getItems,
   createItem,
@@ -22,7 +24,7 @@ router.put("/:itemId/likes", likeItem);
 router.delete("/:itemId/likes", dislikeItem);
 
 router.use((req, res) => {
-  res.status(404).json({ message: "Requested resource not found" });
+  res.status(NOT_FOUND).json({ message: "Requested resource not found" });
 });
 
 module.exports = router;

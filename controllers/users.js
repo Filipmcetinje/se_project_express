@@ -1,3 +1,5 @@
+const { UNAUTHORIZED } = require("../utils/errors");
+
 const bcrypt = require("bcryptjs");
 
 const jwt = require("jsonwebtoken");
@@ -75,41 +77,34 @@ const login = async (req, res) => {
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
     return res.status(200).json({ token });
   } catch (err) {
-    return res.status(401).json({ message: "Incorrect email or password" });
+    return res
+      .status(UNAUTHORIZED)
+      .json({ message: "Incorrect email or password" });
   }
 };
 
 const updateUser = async (req, res) => {
   try {
-    const { name, avatar, email } = req.body;
+    const { name, avatar } = req.body;
 
-    if (email) {
-      const existingUser = await User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== req.user._id) {
-        return res.status(CONFLICT).json({ message: "Email already in use" });
-      }
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
       req.user._id,
-      { name, avatar, email },
+      { name, avatar },
       { new: true, runValidators: true }
     );
 
-    if (!updatedUser) {
+    if (!user) {
       return res.status(NOT_FOUND).json({ message: "User not found" });
     }
 
-    return res.status(200).json({
-      name: updatedUser.name,
-      avatar: updatedUser.avatar,
-      email: updatedUser.email,
-    });
+    return res.status(200).json(user);
   } catch (err) {
     if (err.name === "ValidationError") {
       return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
     }
-    return res.status(SERVER_ERROR).json({ message: "Server error" });
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error occurred on the server" });
   }
 };
 
