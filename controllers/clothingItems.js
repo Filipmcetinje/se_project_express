@@ -33,8 +33,14 @@ const createItem = async (req, res) => {
 
     const item = await ClothingItem.create({ name, weather, imageUrl, owner });
     return res.status(201).json(item);
-  } catch {
-    return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
+    }
+
+    return res
+      .status(500)
+      .json({ message: "An error has occurred on the server" });
   }
 };
 

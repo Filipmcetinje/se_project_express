@@ -26,7 +26,6 @@ app.use(express.json());
 app.post("/signup", createUser);
 app.post("/signin", login);
 
-app.use(auth);
 app.use("/users", usersRouter);
 app.use("/items", itemsRouter);
 

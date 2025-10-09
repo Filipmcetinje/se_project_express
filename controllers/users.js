@@ -24,7 +24,11 @@ const getCurrentUser = async (req, res) => {
       _id: user._id,
     });
   } catch (err) {
-    return res.status(NOT_FOUND).json({ message: "User not found" });
+    if (err.name === "DocumentNotFoundError") {
+      return res.status(NOT_FOUND).json({ message: "User not found" });
+    }
+
+    return res.status(500).json({ message: "An error occurred on the server" });
   }
 };
 
@@ -36,6 +40,11 @@ const createUser = async (req, res) => {
       return res
         .status(BAD_REQUEST)
         .json({ message: "Email and password are required" });
+    }
+    if (password.length < 8) {
+      return res
+        .status(BAD_REQUEST)
+        .json({ message: "Password must be at least 8 characters long" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -76,9 +85,12 @@ const login = async (req, res) => {
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
     return res.status(200).json({ token });
   } catch (err) {
-    return res
-      .status(UNAUTHORIZED)
-      .json({ message: "Incorrect email or password" });
+    if (err.message === "Incorrect email or password") {
+      return res
+        .status(UNAUTHORIZED)
+        .json({ message: "Incorrect email or password" });
+    }
+    return res.status(500).json({ message: "An error occurred on the server" });
   }
 };
 
