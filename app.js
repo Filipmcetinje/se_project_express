@@ -15,8 +15,6 @@ const { NOT_FOUND } = require("./utils/errors");
 const { PORT = 3001, MONGO_URI = "mongodb://127.0.0.1:27017/wtwr_db" } =
   process.env;
 
-const auth = require("./middlewares/auth");
-
 const app = express();
 
 app.use(cors());
