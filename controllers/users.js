@@ -28,7 +28,9 @@ const getCurrentUser = async (req, res) => {
       return res.status(NOT_FOUND).json({ message: "User not found" });
     }
 
-    return res.status(500).json({ message: "An error occurred on the server" });
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error occurred on the server" });
   }
 };
 
@@ -90,7 +92,9 @@ const login = async (req, res) => {
         .status(UNAUTHORIZED)
         .json({ message: "Incorrect email or password" });
     }
-    return res.status(500).json({ message: "An error occurred on the server" });
+    return res
+      .status(SERVER_ERROR)
+      .json({ message: "An error occurred on the server" });
   }
 };
 
