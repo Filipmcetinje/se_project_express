@@ -82,11 +82,14 @@ const login = async (req, res) => {
         .json({ message: "Email and password are required" });
     }
 
+    console.log("🟢 LOGIN ATTEMPT:", email, password);
     const user = await User.findUserByCredentials(email, password);
+    console.log("✅ LOGIN SUCCESS:", user.email);
 
     const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: "7d" });
     return res.status(200).json({ token });
   } catch (err) {
+    console.error("❌ LOGIN ERROR:", err.message);
     if (err.message === "Incorrect email or password") {
       return res
         .status(UNAUTHORIZED)

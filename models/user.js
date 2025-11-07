@@ -43,14 +43,22 @@ userSchema.statics.findUserByCredentials = async function findUserByCredentials(
   email,
   password
 ) {
+  console.log("🔍 Looking for user:", email);
+
   const user = await this.findOne({ email }).select("+password");
   if (!user) {
+    console.log("❌ No user found for:", email);
     throw new Error("Incorrect email or password");
   }
+
+  console.log("🧂 Comparing passwords...");
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
+    console.log("❌ Password mismatch for:", email);
     throw new Error("Incorrect email or password");
   }
+  console.log("✅ Password match for:", email);
   return user;
 };
 

@@ -21,6 +21,11 @@ app.use(cors());
 
 app.use(express.json());
 
+app.use((req, res, next) => {
+  console.log("📩 Incoming request:", req.method, req.path);
+  next();
+});
+
 app.post("/signup", createUser);
 app.post("/signin", login);
 
@@ -31,7 +36,6 @@ app.use((req, res) => {
   res.status(NOT_FOUND).json({ message: "Requested resource not found" });
 });
 
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, _next) => {
   const { statusCode = 500, message } = err;
   res.status(statusCode).json({ message });
@@ -40,6 +44,11 @@ app.use((err, req, res, _next) => {
 mongoose
   .connect(MONGO_URI)
   .then(() => {
-    app.listen(PORT);
+    console.log("Connected to MongoDB");
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
   })
-  .catch(() => {});
+  .catch((err) => {
+    console.error("Error connecting to MongoDB:", err);
+  });
