@@ -1,86 +1,70 @@
 const mongoose = require("mongoose");
-
 const ClothingItem = require("../models/clothingItem");
 
-const {
-  BAD_REQUEST,
-  NOT_FOUND,
-  SERVER_ERROR,
-  FORBIDDEN,
-} = require("../utils/errors");
+const BadRequestError = require("../errors/badRequestError.js");
+const NotFoundError = require("../errors/notFoundError.js");
+const ForbiddenError = require("../errors/forbiddenError.js");
 
-const getItems = async (req, res) => {
+const getItems = async (req, res, next) => {
   try {
     const items = await ClothingItem.find({});
     return res.json(items);
-  } catch {
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+  } catch (err) {
+    return next(err);
   }
 };
 
-const createItem = async (req, res) => {
+const createItem = async (req, res, next) => {
   try {
     const { name, weather, imageUrl } = req.body;
     const owner = req.user._id;
 
     if (!name || !weather || !imageUrl || !owner) {
-      return res.status(BAD_REQUEST).json({
-        message: "name, weather, imageUrl and owner are required",
-      });
+      return next(
+        new BadRequestError("name, weather, imageUrl and owner are required")
+      );
     }
 
     const item = await ClothingItem.create({ name, weather, imageUrl, owner });
     return res.status(201).json(item);
   } catch (err) {
     if (err.name === "ValidationError") {
-      return res.status(BAD_REQUEST).json({ message: "Invalid data provided" });
+      return next(new BadRequestError("Invalid data provided"));
     }
 
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return next(err);
   }
 };
 
-const deleteItem = async (req, res) => {
+const deleteItem = async (req, res, next) => {
   try {
     const { itemId } = req.params;
 
     if (!mongoose.isValidObjectId(itemId)) {
-      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+      return next(new BadRequestError("Invalid item ID"));
     }
 
     const item = await ClothingItem.findById(itemId).orFail(() => {
-      const error = new Error("Item not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
+      throw new NotFoundError("Item not found");
     });
 
     if (item.owner.toString() !== req.user._id) {
-      return res
-        .status(FORBIDDEN)
-        .json({ message: "Cannot delete another user's item" });
+      return next(new ForbiddenError("Cannot delete another user's item"));
     }
 
     await item.deleteOne();
     return res.json({ message: "Item deleted", data: item });
   } catch (err) {
-    if (err.statusCode)
-      return res.status(err.statusCode).json({ message: err.message });
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return next(err);
   }
 };
 
-const likeItem = async (req, res) => {
+const likeItem = async (req, res, next) => {
   try {
     const { itemId } = req.params;
 
     if (!mongoose.isValidObjectId(itemId)) {
-      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+      return next(new BadRequestError("Invalid item ID"));
     }
 
     const item = await ClothingItem.findByIdAndUpdate(
@@ -88,27 +72,21 @@ const likeItem = async (req, res) => {
       { $addToSet: { likes: req.user._id } },
       { new: true }
     ).orFail(() => {
-      const error = new Error("Item not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
+      throw new NotFoundError("Item not found");
     });
 
     return res.json(item);
   } catch (err) {
-    if (err.statusCode)
-      return res.status(err.statusCode).json({ message: err.message });
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return next(err);
   }
 };
 
-const dislikeItem = async (req, res) => {
+const dislikeItem = async (req, res, next) => {
   try {
     const { itemId } = req.params;
 
     if (!mongoose.isValidObjectId(itemId)) {
-      return res.status(BAD_REQUEST).json({ message: "Invalid item ID" });
+      return next(new BadRequestError("Invalid item ID"));
     }
 
     const item = await ClothingItem.findByIdAndUpdate(
@@ -116,18 +94,12 @@ const dislikeItem = async (req, res) => {
       { $pull: { likes: req.user._id } },
       { new: true }
     ).orFail(() => {
-      const error = new Error("Item not found");
-      error.statusCode = NOT_FOUND;
-      throw error;
+      throw new NotFoundError("Item not found");
     });
 
     return res.json(item);
   } catch (err) {
-    if (err.statusCode)
-      return res.status(err.statusCode).json({ message: err.message });
-    return res
-      .status(SERVER_ERROR)
-      .json({ message: "An error has occurred on the server" });
+    return next(err);
   }
 };
 

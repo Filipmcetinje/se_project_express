@@ -17,6 +17,12 @@ const { PORT = 3001, MONGO_URI = "mongodb://127.0.0.1:27017/wtwr_db" } =
 
 const app = express();
 
+const errorHandler = require("./middlewares/error-handler");
+
+const { errors } = require("celebrate");
+
+const { requestLogger, errorLogger } = require("./middlewares/logger");
+
 app.use(cors());
 
 app.use(express.json());
@@ -25,6 +31,8 @@ app.use((req, res, next) => {
   console.log("📩 Incoming request:", req.method, req.path);
   next();
 });
+
+app.use(requestLogger);
 
 app.post("/signup", createUser);
 app.post("/signin", login);
@@ -36,10 +44,11 @@ app.use((req, res) => {
   res.status(NOT_FOUND).json({ message: "Requested resource not found" });
 });
 
-app.use((err, req, res, _next) => {
-  const { statusCode = 500, message } = err;
-  res.status(statusCode).json({ message });
-});
+app.use(errorLogger);
+
+app.use(errors());
+
+app.use(errorHandler);
 
 mongoose
   .connect(MONGO_URI)
