@@ -29,12 +29,13 @@ app.use(cors());
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  console.log("📩 Incoming request:", req.method, req.path);
-  next();
-});
-
 app.use(requestLogger);
+
+app.get("/crash-test", () => {
+  setTimeout(() => {
+    throw new Error("Server will crash now");
+  }, 0);
+});
 
 app.post("/signup", createUser);
 app.post("/signin", login);
