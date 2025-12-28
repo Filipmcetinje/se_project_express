@@ -6,6 +6,8 @@ const mongoose = require("mongoose");
 
 const cors = require("cors");
 
+const { errors } = require("celebrate");
+
 const usersRouter = require("./routes/users");
 
 const itemsRouter = require("./routes/clothingItems");
@@ -20,8 +22,6 @@ const { PORT = 3001, MONGO_URI = "mongodb://127.0.0.1:27017/wtwr_db" } =
 const app = express();
 
 const errorHandler = require("./middlewares/error-handler");
-
-const { errors } = require("celebrate");
 
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 

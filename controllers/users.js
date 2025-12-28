@@ -4,10 +4,10 @@ const jwt = require("jsonwebtoken");
 
 const User = require("../models/user");
 
-const BadRequestError = require("../errors/badRequestError.js");
-const NotFoundError = require("../errors/notFoundError.js");
-const ConflictError = require("../errors/conflictError.js");
-const UnauthorizedError = require("../errors/unauthorizedError.js");
+const BadRequestError = require("../errors/badRequestError");
+const NotFoundError = require("../errors/notFoundError");
+const ConflictError = require("../errors/conflictError");
+const UnauthorizedError = require("../errors/unauthorizedError");
 
 const { JWT_SECRET = "dev-secret" } = require("../utils/config");
 

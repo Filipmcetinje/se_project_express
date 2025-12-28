@@ -1,10 +1,10 @@
 const express = require("express");
+const { celebrate, Joi } = require("celebrate");
 
 const router = express.Router();
 
 const auth = require("../middlewares/auth");
-
-const { NOT_FOUND } = require("../utils/errors");
+const NotFoundError = require("../errors/notFoundError");
 
 const {
   getItems,
@@ -18,13 +18,50 @@ router.get("/", getItems);
 
 router.use(auth);
 
-router.post("/", createItem);
-router.delete("/:itemId", deleteItem);
-router.put("/:itemId/likes", likeItem);
-router.delete("/:itemId/likes", dislikeItem);
+router.post(
+  "/",
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().required(),
+      weather: Joi.string().valid("hot", "warm", "cold").required(),
+      imageUrl: Joi.string().uri().required(),
+    }),
+  }),
+  createItem
+);
 
-router.use((req, res) => {
-  res.status(NOT_FOUND).json({ message: "Requested resource not found" });
+router.delete(
+  "/:itemId",
+  celebrate({
+    params: Joi.object().keys({
+      itemId: Joi.string().hex().length(24).required(),
+    }),
+  }),
+  deleteItem
+);
+
+router.put(
+  "/:itemId/likes",
+  celebrate({
+    params: Joi.object().keys({
+      itemId: Joi.string().hex().length(24).required(),
+    }),
+  }),
+  likeItem
+);
+
+router.delete(
+  "/:itemId/likes",
+  celebrate({
+    params: Joi.object().keys({
+      itemId: Joi.string().hex().length(24).required(),
+    }),
+  }),
+  dislikeItem
+);
+
+router.use((req, res, next) => {
+  next(new NotFoundError("Requested resource not found"));
 });
 
 module.exports = router;

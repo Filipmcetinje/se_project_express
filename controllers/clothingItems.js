@@ -1,9 +1,9 @@
 const mongoose = require("mongoose");
 const ClothingItem = require("../models/clothingItem");
 
-const BadRequestError = require("../errors/badRequestError.js");
-const NotFoundError = require("../errors/notFoundError.js");
-const ForbiddenError = require("../errors/forbiddenError.js");
+const BadRequestError = require("../errors/badRequestError");
+const NotFoundError = require("../errors/notFoundError");
+const ForbiddenError = require("../errors/forbiddenError");
 
 const getItems = async (req, res, next) => {
   try {

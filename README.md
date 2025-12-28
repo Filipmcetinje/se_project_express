@@ -1,6 +1,13 @@
 # WTWR (What to Wear?): Back End
 
-The back-end project is focused on creating a server for the WTWR application. You’ll gain a deeper understanding of how to work with databases, set up security and testing, and deploy web applications on a remote machine. The eventual goal is to create a server with an API and user authorization.
+This repository contains the back-end for the WTWR (What to Wear?) application.
+The project focuses on building a secure and scalable server with:
+user authorization & authentication
+centralized error handling
+request validation using Celebrate/Joi
+REST API for managing users and clothing items
+MongoDB database integration
+The server is built with Node.js, Express.js, and Mongoose.
 
 ## Running the Project
 
