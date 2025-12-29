@@ -85,10 +85,27 @@ const validateItemId = celebrate({
   }),
 });
 
+const validateUserUpdate = celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30).required().messages({
+      "string.min": 'The minimum length of the "name" field is 2',
+      "string.max": 'The maximum length of the "name" field is 30',
+      "string.empty": 'The "name" field must be filled in',
+      "any.required": 'The "name" field is required',
+    }),
+    avatar: Joi.string().required().custom(validateURL).messages({
+      "string.empty": 'The "avatar" field must be filled in',
+      "string.uri": 'The "avatar" field must be a valid URL',
+      "any.required": 'The "avatar" field is required',
+    }),
+  }),
+});
+
 module.exports = {
   validateCardBody,
   validateSignup,
   validateLogin,
   validateUserId,
   validateItemId,
+  validateUserUpdate,
 };

@@ -1,34 +1,25 @@
 require("dotenv").config();
 
 const express = require("express");
-
 const mongoose = require("mongoose");
-
 const cors = require("cors");
-
 const { errors } = require("celebrate");
 
 const usersRouter = require("./routes/users");
-
 const itemsRouter = require("./routes/clothingItems");
-
 const { createUser, login } = require("./controllers/users");
-
-const { NOT_FOUND } = require("./utils/errors");
+const { validateSignup, validateLogin } = require("./middlewares/validation");
+const errorHandler = require("./middlewares/error-handler");
+const { requestLogger, errorLogger } = require("./middlewares/logger");
+const NotFoundError = require("./errors/notFoundError");
 
 const { PORT = 3001, MONGO_URI = "mongodb://127.0.0.1:27017/wtwr_db" } =
   process.env;
 
 const app = express();
 
-const errorHandler = require("./middlewares/error-handler");
-
-const { requestLogger, errorLogger } = require("./middlewares/logger");
-
 app.use(cors());
-
 app.use(express.json());
-
 app.use(requestLogger);
 
 app.get("/crash-test", () => {
@@ -37,20 +28,18 @@ app.get("/crash-test", () => {
   }, 0);
 });
 
-app.post("/signup", createUser);
-app.post("/signin", login);
+app.post("/signup", validateSignup, createUser);
+app.post("/signin", validateLogin, login);
 
 app.use("/users", usersRouter);
 app.use("/items", itemsRouter);
 
-app.use((req, res) => {
-  res.status(NOT_FOUND).json({ message: "Requested resource not found" });
+app.use((req, res, next) => {
+  next(new NotFoundError("Requested resource not found"));
 });
 
 app.use(errorLogger);
-
 app.use(errors());
-
 app.use(errorHandler);
 
 mongoose
