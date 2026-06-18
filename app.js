@@ -13,7 +13,7 @@ const errorHandler = require("./middlewares/error-handler");
 const { requestLogger, errorLogger } = require("./middlewares/logger");
 const NotFoundError = require("./errors/notFoundError");
 
-const { PORT = 3001, MONGO_URI = "mongodb://127.0.0.1:27017/wtwr_db" } =
+const { PORT = 3001, MONGO_URI = "mongodb://127.0.0.1:27017/art_gallery_db" } =
   process.env;
 
 const app = express();

@@ -16,16 +16,30 @@ const getItems = async (req, res, next) => {
 
 const createItem = async (req, res, next) => {
   try {
-    const { name, weather, imageUrl } = req.body;
-    const owner = req.user._id;
+    const {
+  objectID,
+  title,
+  artistDisplayName,
+  objectDate,
+  primaryImageSmall,
+} = req.body;
 
-    if (!name || !weather || !imageUrl || !owner) {
-      return next(
-        new BadRequestError("name, weather, imageUrl and owner are required")
-      );
-    }
+const owner = req.user._id;
 
-    const item = await ClothingItem.create({ name, weather, imageUrl, owner });
+if (!objectID || !title || !primaryImageSmall || !owner) {
+  return next(
+    new BadRequestError("objectID, title, primaryImageSmall and owner are required")
+  );
+}
+
+const item = await ClothingItem.create({
+  objectID,
+  title,
+  artistDisplayName,
+  objectDate,
+  primaryImageSmall,
+  owner,
+});
     return res.status(201).json(item);
   } catch (err) {
     if (err.name === "ValidationError") {

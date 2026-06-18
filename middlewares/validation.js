@@ -10,19 +10,28 @@ const validateURL = (value, helpers) => {
 
 const validateCardBody = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().min(2).max(30).required().messages({
-      "string.min": 'The minimum length of the "name" field is 2',
-      "string.max": 'The maximum length of the "name" field is 30',
-      "string.empty": 'The "name" field must be filled in',
+    objectID: Joi.number().required().messages({
+      "number.base": 'The "objectID" field must be a number',
+      "any.required": 'The "objectID" field is required',
     }),
-    imageUrl: Joi.string().required().custom(validateURL).messages({
-      "string.empty": 'The "imageUrl" field must be filled in',
-      "string.uri": 'The "imageUrl" field must be a valid URL',
-      "any.required": 'The "imageUrl" field is required',
+
+    title: Joi.string().required().messages({
+      "string.empty": 'The "title" field must be filled in',
+      "any.required": 'The "title" field is required',
     }),
-    weather: Joi.string().required().messages({
-      "string.empty": 'The "weather" field must be filled in',
-      "any.required": 'The "weather" field is required',
+
+    artistDisplayName: Joi.string().allow("").messages({
+      "string.base": 'The "artistDisplayName" field must be a string',
+    }),
+
+    objectDate: Joi.string().allow("").messages({
+      "string.base": 'The "objectDate" field must be a string',
+    }),
+
+    primaryImageSmall: Joi.string().required().custom(validateURL).messages({
+      "string.empty": 'The "primaryImageSmall" field must be filled in',
+      "string.uri": 'The "primaryImageSmall" field must be a valid URL',
+      "any.required": 'The "primaryImageSmall" field is required',
     }),
   }),
 });
