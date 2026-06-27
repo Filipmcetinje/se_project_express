@@ -34,6 +34,13 @@ app.post("/signin", validateLogin, login);
 app.use("/users", usersRouter);
 app.use("/items", itemsRouter);
 
+app.get("/", (req, res) => {
+  res.status(200).send({
+    message: "WTWR Backend API",
+    status: "Running",
+  });
+});
+
 app.use((req, res, next) => {
   next(new NotFoundError("Requested resource not found"));
 });
