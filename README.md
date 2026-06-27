@@ -1,43 +1,80 @@
-# WTWR (What to Wear?): Back End
+# WTWR (What to Wear?) – Backend
 
-This repository contains the back-end for the WTWR (What to Wear?) application.
-The project focuses on building a secure and scalable server with:
-user authorization & authentication
-centralized error handling
-request validation using Celebrate/Joi
-REST API for managing users and clothing items
-MongoDB database integration
-The server is built with Node.js, Express.js, and Mongoose.
+This repository contains the backend for the **WTWR (What to Wear?)** application.
+
+The server provides a secure REST API that allows users to register, log in, and manage clothing items based on current weather conditions. It is built with **Node.js**, **Express.js**, **MongoDB**, and **Mongoose**, and uses **JWT authentication** to protect private routes.
+
+## Features
+
+- User registration and login
+- JWT authentication and protected routes
+- CRUD operations for clothing items
+- Like and unlike clothing items
+- MongoDB database integration
+- Request validation with Celebrate/Joi
+- Centralized error handling
+- RESTful API
+
+## Technologies
+
+- Node.js
+- Express.js
+- MongoDB
+- Mongoose
+- JWT Authentication
+- Celebrate / Joi
+- ESLint
 
 ## Running the Project
 
-`npm run start` — to launch the server
+Install dependencies:
 
-`npm run dev` — to launch the server with the hot reload feature
+```bash
+npm install
+```
 
-### Testing
+Start the production server:
 
-Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
+```bash
+npm run start
+```
 
-## Description
+Start the development server:
 
-This is the back-end for the WTWR (What to Wear?) application.  
-It provides a REST API to manage users and clothing items.  
-The server is built with **Node.js**, **Express.js**, and **MongoDB** (via Mongoose).
+```bash
+npm run dev
+```
 
-## Deployed Project
+## API Endpoints
 
-Frontend:
-https://filip-wtwr.undo.it
+| Method | Endpoint               | Description                        |
+| ------ | ---------------------- | ---------------------------------- |
+| POST   | `/signup`              | Register a new user                |
+| POST   | `/signin`              | Log in and receive a JWT           |
+| GET    | `/users/me`            | Get the current user's profile     |
+| PATCH  | `/users/me`            | Update the current user's profile  |
+| GET    | `/items`               | Get all clothing items             |
+| POST   | `/items`               | Create a clothing item             |
+| DELETE | `/items/:itemId`       | Delete a clothing item             |
+| PUT    | `/items/:itemId/likes` | Like a clothing item               |
+| DELETE | `/items/:itemId/likes` | Remove a like from a clothing item |
+
+## Live API
 
 Backend API:
-https://api.filip-wtwr.undo.it
 
-## Frontend GitHub Repository
+https://wtwr-backend-7hd1.onrender.com
+
+## Frontend
+
+Live Demo:
+
+https://filipmcetinje.github.io/se_project_react/
+
+Frontend Repository:
 
 https://github.com/Filipmcetinje/se_project_react
 
-## Project Pitch Video
+## Backend Repository
 
-Check out [this video](https://drive.google.com/file/d/1aRNTNPoqb88s4SIuVe6cokpAidz7hbK2/view?usp=sharing),
-where I explain my WTWR project and challenges I solved during development.
+https://github.com/Filipmcetinje/se_project_express
